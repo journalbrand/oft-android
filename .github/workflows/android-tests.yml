@@ -1,43 +1,39 @@
-name: Android Tests
+name: Android Traceability Analysis
 
 on: [push, pull_request]
 
 jobs:
-  test:
+  trace:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
       
-      - name: Setup JDK
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
       
-      - name: Create build structure
-        run: |
-          # Create a temporary Gradle project structure
-          mkdir -p app/src/main/kotlin/com/oft/android
-          mkdir -p app/src/test/kotlin/com/oft/android
-          cp src/FooProvider.kt app/src/main/kotlin/com/oft/android/
-          cp test/FooProviderTest.kt app/src/test/kotlin/com/oft/android/
-      
-      - name: Run Tests
-        run: ./gradlew test
-      
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-      
       - name: Install OpenFastTrace
         run: |
-          python -m pip install --upgrade pip
-          pip install openfasttrace
+          # Clone the OpenFastTrace repository
+          git clone https://github.com/itsallcode/openfasttrace.git
+          cd openfasttrace
+          
+          # Build with Maven
+          ./mvnw clean install -DskipTests
+          
+          # Make the OFT command available
+          sudo ln -s $(pwd)/openfasttrace-cli/target/openfasttrace-cli-*-jar-with-dependencies.jar /usr/local/bin/openfasttrace.jar
+          echo '#!/bin/sh
+          java -jar /usr/local/bin/openfasttrace.jar "$@"' | sudo tee /usr/local/bin/oft
+          sudo chmod +x /usr/local/bin/oft
       
       - name: Run Traceability Analysis
         run: |
           # Import specifications from all source files and generate a tracing report
+          echo "Analyzing traceability in Android implementation..."
           oft import -i . -o trace.xml
           oft report -i trace.xml -o verification-android.md -f markdown
       

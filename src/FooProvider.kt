@@ -2,7 +2,7 @@ package com.oft.android
 
 /**
  * Provides the capability to return the string "foo"
- * [impl~android.string-return~1]
+ * [impl->req~android.string-return~1]
  */
 class FooProvider {
     companion object {

@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 
 /**
  * Test suite for the FooProvider class
- * [utest~android.string-return~1]
+ * [utest->req~android.string-return~1]
  */
 class FooProviderTest {
     /**
